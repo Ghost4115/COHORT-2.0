@@ -1,52 +1,36 @@
-const express=require('express')
+const express = require("express")
+const cors = require("cors")
+const path = require("path")
+const Note = require("./models/note.model")
 
-const Note=require('./models/note.model')
-const app=express()
-const cors=require('cors')
-const path=require('path')
-app.use(cors())
+const app = express()
+
+app.use(cors({ origin: "*" }))
 app.use(express.json())
-app.use(express.static(path.join(__dirname,"..",'public')))
+app.use(express.static(path.join(__dirname, "..", "public")))
 
-
-
-app.post('/api/Notes',async (req,res)=>{
-    const {title,description}=req.body
-   const note=await Note.create({title,description})   
-
-   res.status(201).json({
-    message:'Note created successfully',
-    note
-   })
+app.post("/api/Notes", async (req, res) => {
+  const note = await Note.create(req.body)
+  res.status(201).json({ message: "Note created", note })
 })
 
-app.get('/api/Notes',async (req,res)=>{
-   const notes=await Note.find()
-    res.status(200).json({
-        message:'Notes fetched successfully',
-        notes
-    })
-})
-app.delete('/api/Notes/:id',async (req,res)=>{
-    const id=req.params.id
-    console.log(id);
-    await Note.findByIdAndDelete(id)
-    res.status(200).json({
-        message:'Note deleted successfully'
-    })  
-    
+app.get("/api/Notes", async (req, res) => {
+  const notes = await Note.find()
+  res.json({ notes })
 })
 
-app.patch('/api/Notes/:id',async (req,res)=>{
-    const id=req.params.id
-    const {title,description}=req.body
-    await Note.findByIdAndUpdate(id,{description})
-    res.status(200).json({
-        message:'Note updated successfully'
-    }) 
+app.delete("/api/Notes/:id", async (req, res) => {
+  await Note.findByIdAndDelete(req.params.id)
+  res.json({ message: "Note deleted" })
 })
 
-app.use('*name', (req, res) => {
-  res.sendFile(path.join(__dirname,".." ,'public/index.html'))
+app.patch("/api/Notes/:id", async (req, res) => {
+  await Note.findByIdAndUpdate(req.params.id, req.body)
+  res.json({ message: "Note updated" })
 })
-module.exports=app
+
+app.use("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "public/index.html"))
+})
+
+module.exports = app

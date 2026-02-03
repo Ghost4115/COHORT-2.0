@@ -1,11 +1,12 @@
-const mongoose=require('mongoose')
+const mongoose = require("mongoose")
 
-function connectDB(){
-    mongoose.connect("mongodb+srv://manavuttekar2_db_user:dbmanav@cluster0.zwgqajm.mongodb.net/lec8")
-    .then(()=>{
-        console.log('Connected to MongoDB')
-    }
-    )
-
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URL)
+    console.log("MongoDB connected")
+  } catch (err) {
+    console.log(err)
+  }
 }
-module.exports=connectDB
+
+module.exports = connectDB

@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from 'react'
-import axios from 'axios'
+import React, { useEffect, useState } from "react"
+import axios from "axios"
+
+const API = import.meta.env.VITE_API_URL || "http://localhost:3000"
 
 const App = () => {
   const [notes, setNotes] = useState([])
 
-  function fetchNotes() {
+  const fetchNotes = () => {
     axios
-      .get('http://localhost:3000/api/Notes')
-      .then((res) => {
-        setNotes(res.data.notes)
-      })
+      .get(`${API}/api/Notes`)
+      .then(res => setNotes(res.data.notes))
       .catch(err => console.log(err))
   }
 
@@ -17,65 +17,50 @@ const App = () => {
     fetchNotes()
   }, [])
 
-  function handleSubmit(e) {
+  const handleSubmit = (e) => {
     e.preventDefault()
-
     const { title, description } = e.target
 
-    const newNote = {
-      title: title.value,
-      description: description.value
-    }
-
     axios
-      .post('http://localhost:3000/api/Notes', newNote)
-      .then((res) => {
-        console.log(res.data)
+      .post(`${API}/api/Notes`, {
+        title: title.value,
+        description: description.value
+      })
+      .then(() => {
         fetchNotes()
         e.target.reset()
       })
-      .catch(err => console.log(err))
   }
-  function handleDelete(id){
-    axios.delete(`http://localhost:3000/api/Notes/${id}`)
-    .then((res)=>{
-      console.log(res.data)
-      fetchNotes()
-    })
-    function UpdateNote(id){
-      
-      axios.put(`http://localhost:3000/api/Notes/${id}`)
-      .then((res)=>{
-        console.log(res.data)
-        fetchNotes()
-      })
-    }
-    
+
+  const handleDelete = (id) => {
+    axios.delete(`${API}/api/Notes/${id}`).then(fetchNotes)
+  }
+
+  const updateNote = (id) => {
+    const newDescription = prompt("Enter new description")
+    if (!newDescription) return
+
+    axios
+      .patch(`${API}/api/Notes/${id}`, { description: newDescription })
+      .then(fetchNotes)
   }
 
   return (
     <div>
-      <form className="noteform" onSubmit={handleSubmit}>
-        <input name="title" type="text" placeholder="Title" required />
+      <form onSubmit={handleSubmit}>
+        <input name="title" placeholder="Title" required />
         <input name="description" placeholder="Description" required />
-        <button type="submit">Add Note</button>
-        
+        <button>Add Note</button>
       </form>
 
-      <div className="notes">
-        {notes.map((note, index) => (
-          <div className="note" key={index}>
-            <h1>{note.title}</h1>
-            <p>{note.description}</p>
-            <button onClick={() => {
-             handleDelete(note._id)
-            }}>Delete</button>
-            <button onClick={()=>{
-        UpdateNote(note._id)
-        }}>Update </button>
-          </div>
-        ))}
-      </div>
+      {notes.map(note => (
+        <div key={note._id}>
+          <h3>{note.title}</h3>
+          <p>{note.description}</p>
+          <button onClick={() => handleDelete(note._id)}>Delete</button>
+          <button onClick={() => updateNote(note._id)}>Update</button>
+        </div>
+      ))}
     </div>
   )
 }

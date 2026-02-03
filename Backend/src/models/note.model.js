@@ -5,5 +5,4 @@ const noteSchema = new mongoose.Schema({
   description: String
 })
 
-const Note = mongoose.model("Note", noteSchema)
-module.exports = Note
+module.exports = mongoose.model("Note", noteSchema)
